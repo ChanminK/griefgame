@@ -10,6 +10,7 @@
 # BLACK = (0, 0, 0)
 # MAZE_COLOR = (41, 0, 162)
 # COLLECTIBLE_COLOR = (224, 255, 0)
+# DOOR_COLOR = (0, 255, 0)  # Temporary color for the door (Green)
 
 # screen = pygame.display.set_mode((WIDTH, HEIGHT))
 # pygame.display.set_caption("Escape Truth")
@@ -57,8 +58,12 @@
 #             door_pos = [x, y]  # Door position
 
 # # Load player image (replace 'player.png' with your actual image path)
-#     player_image = pygame.image.load('1.png')
-#     player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
+# player_image = pygame.image.load('1.png')
+# player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
+
+# # Load background image (replace 'background.png' with your actual background image path)
+# background_image = pygame.image.load('background.png')
+# background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 # # Font for displaying text
 # font = pygame.font.SysFont("Arial", 40)
@@ -80,6 +85,10 @@
 #     """Draw the collectibles."""
 #     for collectible in collectibles:
 #         pygame.draw.rect(screen, COLLECTIBLE_COLOR, collectible)
+
+# def draw_door():
+#     """Draw the door with a temporary color."""
+#     pygame.draw.rect(screen, DOOR_COLOR, (*door_pos, CELL_SIZE, CELL_SIZE))
 
 # def display_game_over():
 #     """Display 'CAUGHT, YOU LOSE' text on the screen."""
@@ -118,6 +127,9 @@
 # try:
 #     while running:
 #         screen.fill(BLACK)  # Clear the screen
+
+#         # Draw background image
+#         screen.blit(background_image, (0, 0))
 
 #         # Event Handling
 #         for event in pygame.event.get():
@@ -193,6 +205,7 @@
 #         draw_player(player_pos)
 #         draw_enemy(enemy_pos)
 #         draw_collectibles()
+#         draw_door()  # Draw the door with the temporary color
 #         display_score(score)
 
 #         pygame.display.flip()  # Update the screen
@@ -237,7 +250,7 @@ maze = [
     "# ### ### ###### ###",
     "# #           #    #",
     "# # ### ######   ####",
-    "#     #           D  #",
+    "#     #           D#",
     "####################",
 ]
 ROWS = len(maze)
@@ -272,6 +285,17 @@ player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
 background_image = pygame.image.load('background.png')
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
+# Load door images
+door_image = pygame.image.load('door.png')
+door_image = pygame.transform.scale(door_image, (CELL_SIZE, CELL_SIZE))
+open_door_image = pygame.image.load('open_door.png')
+open_door_image = pygame.transform.scale(open_door_image, (CELL_SIZE, CELL_SIZE))
+
+# Load sound effects
+pygame.mixer.music.load('background_music.mp3')  # Replace with your background music path
+pygame.mixer.music.play(-1, 0.0)  # Loop the background music indefinitely
+bling_sound = pygame.mixer.Sound('bling_sound.wav')  # Replace with your bling sound effect
+
 # Font for displaying text
 font = pygame.font.SysFont("Arial", 40)
 
@@ -294,8 +318,11 @@ def draw_collectibles():
         pygame.draw.rect(screen, COLLECTIBLE_COLOR, collectible)
 
 def draw_door():
-    """Draw the door with a temporary color."""
-    pygame.draw.rect(screen, DOOR_COLOR, (*door_pos, CELL_SIZE, CELL_SIZE))
+    """Draw the door with a temporary color or open door."""
+    if score == len(collectibles):  # If all collectibles are collected
+        screen.blit(open_door_image, (door_pos[0], door_pos[1]))
+    else:
+        screen.blit(door_image, (door_pos[0], door_pos[1]))
 
 def display_game_over():
     """Display 'CAUGHT, YOU LOSE' text on the screen."""
@@ -355,11 +382,11 @@ try:
         if keys[pygame.K_RIGHT]:
             move[0] += player_speed  # Move right by player_speed
 
-        # Calculate new player position
+        # Calculate new player position with some leniency for collisions
         new_player_pos = [player_pos[0] + move[0], player_pos[1] + move[1]]
         player_rect = pygame.Rect(*new_player_pos, CELL_SIZE, CELL_SIZE)
 
-        # Check if player can move (no collision with walls)
+        # Check if player can move (less strict collision)
         if not any(player_rect.colliderect(wall) for wall in walls):
             player_pos = new_player_pos
 
@@ -368,6 +395,7 @@ try:
             if player_rect.colliderect(collectible):
                 collectibles.remove(collectible)  # Remove the collectible
                 score += 1  # Increase score
+                bling_sound.play()  # Play bling sound
 
         # Check if all collectibles are collected
         if score == len(collectibles):
@@ -391,10 +419,9 @@ try:
             move_enemy[1] = -enemy_speed
 
         # Check if the enemy can move in the x direction
-        if can_move_to(enemy_pos[0] + move_enemy[0], enemy_pos[1]):
-            enemy_pos[0] += move_enemy[0]
-
-        # Check if the enemy can move in the y direction
+        if can_move_to(enemy_pos[0] + move_enemy[0], enemy_pos[1]): enemy_pos[0] += move_enemy[0]
+        
+         # Check if the enemy can move in the y direction
         if can_move_to(enemy_pos[0], enemy_pos[1] + move_enemy[1]):
             enemy_pos[1] += move_enemy[1]
 

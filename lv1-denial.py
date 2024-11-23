@@ -19,17 +19,17 @@ maze = [
     "####################",
     "#P                E#",
     "# ### ### ###### ###",
-    "# #            #   #",
+    "# # C           #   #",
     "# # ### ##  #####   #",
     "#     #             #",
     "# ### ### ###### ###",
-    "#              #   #",
+    "#    C          #   #",
     "# # ### #########   #",
-    "#     #             #",
+    "#     #     C        #",
     "# ### ### ###### ###",
     "# #           #    #",
     "# # ### ######   ####",
-    "#     #             #",
+    "#     #           D  #",
     "####################",
 ]
 ROWS = len(maze)
@@ -57,13 +57,8 @@ for row_idx, row in enumerate(maze):
             door_pos = [x, y]  # Door position
 
 # Load player image (replace 'player.png' with your actual image path)
-try:
     player_image = pygame.image.load('1.png')
     player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
-except pygame.error as e:
-    print(f"Error loading player image: {e}")
-    player_image = pygame.Surface((CELL_SIZE, CELL_SIZE))  # Fallback to a placeholder if image fails
-    player_image.fill((0, 255, 0))  # Filling it with green as a placeholder
 
 # Font for displaying text
 font = pygame.font.SysFont("Arial", 40)

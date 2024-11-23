@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 
 # Initialize Pygame
 pygame.init()
@@ -63,11 +64,6 @@ falling_objects = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
-# Create target falling object (red) and other falling objects (blue)
-target_object = FallingObject(RED, target=True)
-falling_objects.add(target_object)
-all_sprites.add(target_object)
-
 # Create random falling objects (blue)
 for _ in range(5):
     obj = FallingObject(BLUE)
@@ -80,6 +76,9 @@ game_over = False
 score = 0
 key_secured = False
 message = ""
+key_fall_time = 0
+key_wait_time = 20  # Time to wait before the red key falls again after missing
+last_key_fall_time = 0
 
 # Game loop
 while not game_over:
@@ -90,6 +89,23 @@ while not game_over:
 
     # Update sprite positions
     all_sprites.update()
+
+    # Time control for when the red key (target) falls
+    current_time = time.time()
+    if key_secured:
+        # Reset wait time for next key fall after key is secured
+        key_wait_time = 20
+        key_fall_time = current_time + random.randint(15, 30)
+
+    if not key_secured and (current_time - last_key_fall_time) >= key_wait_time:
+        # Create red target falling object
+        target_object = FallingObject(RED, target=True)
+        falling_objects.add(target_object)
+        all_sprites.add(target_object)
+
+        # Update the time when the key fell
+        last_key_fall_time = current_time
+        key_wait_time = random.randint(15, 30)  # Randomize the next fall time (15-30 seconds)
 
     # Check for collisions with the target object
     if pygame.sprite.collide_rect(player, target_object) and not key_secured:

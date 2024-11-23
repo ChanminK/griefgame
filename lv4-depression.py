@@ -1,179 +1,153 @@
 import pygame
 import random
-import time
+import sys
 
 # Initialize Pygame
 pygame.init()
 
-# Game settings
-WIDTH, HEIGHT = 500, 600
+# Screen dimensions and settings
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
 FPS = 60
-PLATFORM_WIDTH, PLATFORM_HEIGHT = 100, 20
-PLAYER_WIDTH, PLAYER_HEIGHT = 50, 50
-GRAVITY = 0.5
-JUMP_STRENGTH = 15
-DOUBLE_JUMP_STRENGTH = 12
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-CYAN = (0, 255, 255)
+BLUE = (135, 206, 250)
+GREEN = (34, 139, 34)
 
 # Initialize screen and clock
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Jumping Game")
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Platform Jumper")
 clock = pygame.time.Clock()
 
-# Player class
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface((PLAYER_WIDTH, PLAYER_HEIGHT))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH // 2, HEIGHT - 100)
-        self.vel_y = 0
-        self.on_ground = False
-        self.can_double_jump = False
+# Fonts
+font = pygame.font.Font(None, 36)
 
-    def update(self, platforms):
-        # Gravity
-        self.vel_y += GRAVITY
-        self.rect.y += self.vel_y
+# Player settings
+player_width = 40
+player_height = 40
+player_x = 100
+player_y = SCREEN_HEIGHT - 150
+player_velocity_y = 0
+gravity = 0.8
+jump_force = -15
+is_jumping = False
 
-        # Collision with platforms
-        self.on_ground = False
-        for platform in platforms:
-            if self.rect.colliderect(platform.rect) and self.vel_y > 0:
-                self.vel_y = 0
-                self.rect.bottom = platform.rect.top
-                self.on_ground = True
-                self.can_double_jump = False  # Reset double jump when touching the ground
+# Platform settings
+platform_width = 100
+platform_height = 20
+platforms = []
+platform_speed = 5
+spawn_timer = 0
+spawn_interval = 1500  # milliseconds
 
-        # Jumping
-        if self.on_ground:
-            self.vel_y = 0
+# Scoring
+score = 0
 
-        # Moving the player
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.rect.x -= 5
-        if keys[pygame.K_RIGHT]:
-            self.rect.x += 5
+# Difficulty scaling
+difficulty_timer = 0
+difficulty_interval = 5000  # milliseconds
+speed_increase = 0.5
 
-    def jump(self):
-        if self.on_ground:
-            self.vel_y = -JUMP_STRENGTH
-            self.can_double_jump = True  # Enable double jump
-        elif self.can_double_jump:
-            self.vel_y = -DOUBLE_JUMP_STRENGTH
-            self.can_double_jump = False  # Disable double jump after it's used
+# Parallax Background
+background_scroll = 0
+background_speed = 2
 
-# Platform class
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
-        self.image.fill(GREEN)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.creation_time = time.time()
-
-    def update(self):
-        if time.time() - self.creation_time > 2:  # Platform disappears after 2 seconds
-            self.kill()
-
-# Moving Platform class
-class MovingPlatform(Platform):
-    def __init__(self, x, y, speed):
-        super().__init__(x, y)
-        self.speed = speed
-        self.direction = 1  # 1 for right, -1 for left
-
-    def update(self):
-        # Move the platform left and right
-        self.rect.x += self.speed * self.direction
-        if self.rect.left <= 0 or self.rect.right >= WIDTH:
-            self.direction *= -1  # Change direction when hitting screen edges
-        super().update()
-
-# Power-Up class (Double Jump)
-class PowerUp(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((20, 20))
-        self.image.fill(CYAN)  # Cyan power-up color
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-
-    def update(self):
-        if self.rect.colliderect(player.rect):
-            # Activate double jump when collected
-            player.can_double_jump = True
-            self.kill()  # Remove power-up once collected
-
-# Initialize platform and player groups
-player = Player()
-player_group = pygame.sprite.Group()
-player_group.add(player)
-
-platforms = pygame.sprite.Group()
-moving_platforms = pygame.sprite.Group()
-
-# Create initial platforms
-for _ in range(5):
-    x = random.randint(50, WIDTH - 150)
-    y = random.randint(100, HEIGHT - 200)
-    platform = Platform(x, y)
-    platforms.add(platform)
-
-# Create moving platforms
-for _ in range(2):
-    x = random.randint(50, WIDTH - 150)
-    y = random.randint(100, HEIGHT - 200)
-    speed = random.randint(2, 5)
-    moving_platform = MovingPlatform(x, y, speed)
-    moving_platforms.add(moving_platform)
-
-# Create a double-jump power-up
-power_up = PowerUp(random.randint(50, WIDTH - 50), random.randint(100, HEIGHT - 100))
-power_up_group = pygame.sprite.Group()
-power_up_group.add(power_up)
-
-# Main game loop
+# Game states
 running = True
-while running:
-    clock.tick(FPS)
-    screen.fill(WHITE)
 
-    # Event handling
+# Functions
+def draw_text(text, x, y, color=BLACK):
+    surface = font.render(text, True, color)
+    screen.blit(surface, (x, y))
+
+def spawn_platform():
+    """Spawns a new platform at a random height."""
+    y = random.randint(SCREEN_HEIGHT // 2, SCREEN_HEIGHT - 50)
+    platform = pygame.Rect(SCREEN_WIDTH, y, platform_width, platform_height)
+    platforms.append(platform)
+
+# Main Game Loop
+while running:
+    screen.fill(BLUE)  # Background color
+
+    # Event Handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.jump()
 
-    # Update game objects
-    player_group.update(platforms)  # Pass platforms to player.update
-    platforms.update()
-    moving_platforms.update()
-    power_up_group.update()
+    # Player Input
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_SPACE] and not is_jumping:
+        player_velocity_y = jump_force
+        is_jumping = True
 
-    # Check if player has reached the top
-    if player.rect.top <= 0:
-        print("You won!")
-        running = False
+    # Update Player
+    player_velocity_y += gravity
+    player_y += player_velocity_y
 
-    # Draw everything
-    player_group.draw(screen)
-    platforms.draw(screen)
-    moving_platforms.draw(screen)
-    power_up_group.draw(screen)
+    # Prevent player from falling off the screen
+    if player_y > SCREEN_HEIGHT:
+        running = False  # Game Over
 
-    # Refresh the screen
+    # Prevent player from jumping indefinitely
+    if player_y + player_height >= SCREEN_HEIGHT - 100:
+        player_y = SCREEN_HEIGHT - 100 - player_height
+        is_jumping = False
+
+    # Update Platforms
+    for platform in platforms[:]:
+        platform.x -= platform_speed
+        if platform.x + platform.width < 0:  # Remove off-screen platforms
+            platforms.remove(platform)
+            score += 1
+
+        # Player collision with platform
+        if (
+            player_x + player_width > platform.x
+            and player_x < platform.x + platform.width
+            and player_y + player_height >= platform.y
+            and player_y + player_height <= platform.y + platform_height
+        ):
+            player_y = platform.y - player_height
+            player_velocity_y = 0
+            is_jumping = False
+
+    # Spawn new platforms
+    spawn_timer += clock.get_time()
+    if spawn_timer > spawn_interval:
+        spawn_timer = 0
+        spawn_platform()
+
+    # Difficulty scaling
+    difficulty_timer += clock.get_time()
+    if difficulty_timer > difficulty_interval:
+        difficulty_timer = 0
+        platform_speed += speed_increase
+
+    # Background Parallax
+    background_scroll -= background_speed
+    if background_scroll <= -SCREEN_WIDTH:
+        background_scroll = 0
+    pygame.draw.rect(screen, GREEN, (background_scroll, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
+    pygame.draw.rect(screen, GREEN, (background_scroll + SCREEN_WIDTH, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
+
+    # Draw Player
+    player = pygame.Rect(player_x, player_y, player_width, player_height)
+    pygame.draw.rect(screen, WHITE, player)
+
+    # Draw Platforms
+    for platform in platforms:
+        pygame.draw.rect(screen, BLACK, platform)
+
+    # Draw Score
+    draw_text(f"Score: {score}", 10, 10)
+
+    # Update Screen
     pygame.display.flip()
+    clock.tick(FPS)
 
 pygame.quit()
+sys.exit()
+ 

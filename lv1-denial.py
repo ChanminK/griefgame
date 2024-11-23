@@ -195,16 +195,6 @@ try:
         draw_collectibles()
         display_score(score)
 
-        # Debugging: Display player position, enemy position, and score
-        debug_text = font.render(f"Player Pos: {player_pos}", True, WHITE)
-        screen.blit(debug_text, (10, 50))
-
-        debug_text = font.render(f"Enemy Pos: {enemy_pos}", True, WHITE)
-        screen.blit(debug_text, (10, 100))
-
-        debug_text = font.render(f"Score: {score}", True, WHITE)
-        screen.blit(debug_text, (10, 150))
-
         pygame.display.flip()  # Update the screen
         clock.tick(FPS)
 

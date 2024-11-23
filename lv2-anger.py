@@ -26,9 +26,6 @@ clock = pygame.time.Clock()
 # FPS
 FPS = 60
 
-# Load the background image
-background = pygame.image.load("background.png")  # Make sure this image is in the same folder
-
 # Fighter class
 class Fighter:
     def __init__(self, x, y, color, speed, damage):
@@ -96,13 +93,19 @@ enemy = Fighter(600, 300, RED, speed=4, damage=2)  # Enemy is slower but still f
 # Game loop variables
 delay_counter = 5  # Counter to control enemy's delayed movement
 
+# Function to create a gradient background
+def draw_gradient():
+    for y in range(SCREEN_HEIGHT):
+        color = (y // 2, 255 - y // 3, 255 - y // 2)  # Simple gradient effect from top to bottom
+        pygame.draw.line(screen, color, (0, y), (SCREEN_WIDTH, y))  # Draw a horizontal line for gradient
+
 # Game loop
 running = True
 while running:
     screen.fill(WHITE)
 
-    # Blit the background image
-    screen.blit(background, (0, 0))  # Draw background image to the screen
+    # Draw gradient background
+    draw_gradient()
 
     # Handle events
     for event in pygame.event.get():
@@ -141,7 +144,7 @@ while running:
     # Check for game over
     if player.health <= 0 or enemy.health <= 0:
         font = pygame.font.Font(None, 74)
-        winner = "Enemy" if player.health <= 0 else "player"
+        winner = "Enemy" if player.health <= 0 else "Player"
         text = font.render(f"{winner} Wins!", True, BLACK)
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
         pygame.display.flip()

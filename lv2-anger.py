@@ -12,7 +12,6 @@ SCREEN_HEIGHT = 400
 # Colors
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
-BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 
@@ -28,20 +27,27 @@ FPS = 60
 
 # Fighter class
 class Fighter:
-    def __init__(self, x, y, color, speed, damage):
+    def __init__(self, x, y, image_path, speed, damage):
         self.x = x
         self.y = y
-        self.width = 50
-        self.height = 80
-        self.color = color
+        original_image = pygame.image.load(image_path)
+        original_width, original_height = original_image.get_size()
+        
+        # Calculate scaling factor to maintain aspect ratio
+        scale_factor = 0.5  # Adjust this factor as needed for your game
+        new_width = int(original_width * scale_factor)
+        new_height = int(original_height * scale_factor)
+        
+        self.image = pygame.transform.scale(original_image, (new_width, new_height))
+        self.width, self.height = self.image.get_size()
         self.health = 100
         self.speed = speed
         self.attack = False
         self.damage = damage  # Damage dealt by this fighter
 
     def draw(self):
-        # Draw the fighter
-        pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
+        # Draw the fighter's image
+        screen.blit(self.image, (self.x, self.y))
 
         # Draw health bar
         pygame.draw.rect(screen, RED, (self.x, self.y - 20, 100, 10))  # Red background
@@ -86,9 +92,9 @@ class Fighter:
                 enemy.health -= self.damage  # Decrease health based on this fighter's damage
 
 
-# Create player and enemy objects
-player = Fighter(100, 300, BLUE, speed=6, damage=5)  # Player is faster and does more damage
-enemy = Fighter(600, 300, RED, speed=4, damage=2)  # Enemy is slower but still faster than default
+# Create player and enemy objects with images
+player = Fighter(100, 300, "2.png", speed=6, damage=5)  # Player with "2.png"
+enemy = Fighter(600, 300, "eye.png", speed=4, damage=2)  # Enemy with "eye.png"
 
 # Game loop variables
 delay_counter = 5  # Counter to control enemy's delayed movement

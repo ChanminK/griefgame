@@ -59,6 +59,8 @@ for row_idx, row in enumerate(maze):
 # Load images
 player_image = pygame.image.load('1.png')
 player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
+eye_image = pygame.image.load('eye.png')  # Enemy sprite
+eye_image = pygame.transform.scale(eye_image, (CELL_SIZE, CELL_SIZE))
 background_image = pygame.image.load('background.png')
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 door_image = pygame.image.load('door.png')
@@ -84,7 +86,7 @@ def draw_player(pos):
     screen.blit(player_image, pos)
 
 def draw_enemy(pos):
-    pygame.draw.rect(screen, (255, 0, 0), (*pos, CELL_SIZE, CELL_SIZE))
+    screen.blit(eye_image, pos)  # Draw the enemy sprite
 
 def draw_collectibles():
     for collectible in collectibles:

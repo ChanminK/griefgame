@@ -26,6 +26,8 @@ clock = pygame.time.Clock()
 # FPS
 FPS = 60
 
+# Load the background image
+background = pygame.image.load("background.png")  # Make sure this image is in the same folder
 
 # Fighter class
 class Fighter:
@@ -89,7 +91,7 @@ class Fighter:
 
 # Create player and enemy objects
 player = Fighter(100, 300, BLUE, speed=6, damage=5)  # Player is faster and does more damage
-enemy = Fighter(600, 300, RED, speed=6, damage=3)  # Enemy is slower and does less damage
+enemy = Fighter(600, 300, RED, speed=4, damage=2)  # Enemy is slower but still faster than default
 
 # Game loop variables
 delay_counter = 5  # Counter to control enemy's delayed movement
@@ -98,6 +100,9 @@ delay_counter = 5  # Counter to control enemy's delayed movement
 running = True
 while running:
     screen.fill(WHITE)
+
+    # Blit the background image
+    screen.blit(background, (0, 0))  # Draw background image to the screen
 
     # Handle events
     for event in pygame.event.get():
@@ -136,7 +141,7 @@ while running:
     # Check for game over
     if player.health <= 0 or enemy.health <= 0:
         font = pygame.font.Font(None, 74)
-        winner = "Enemy" if player.health <= 0 else "Player"
+        winner = "Enemy" if player.health <= 0 else "player"
         text = font.render(f"{winner} Wins!", True, BLACK)
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2))
         pygame.display.flip()

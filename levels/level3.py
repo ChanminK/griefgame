@@ -45,6 +45,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (screen_width // 2, screen_height - 50)
         self.speed = 5
 
+    #MOVING
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and self.rect.left > 0:

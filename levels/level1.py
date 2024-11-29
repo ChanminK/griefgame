@@ -1,8 +1,6 @@
 import pygame
+import sys
 
-pygame.init()
-
-# Constants
 WIDTH, HEIGHT = 800, 600
 CELL_SIZE = 40
 FPS = 60
@@ -14,14 +12,16 @@ COLLECTIBLE_COLOR = (224, 255, 0)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Escape Truth")
 
-# # = wall, 
-# E = Enemy 
-# C = Collectable 
+#Maze Layout
+# EVENTUALLY MAKE IT GENERATE ITS OWN
+# # = Wall
+# P = Player
+# E = Enemy
+# C = Coin
 # D = Door
-
 maze = [
     "####################",
-    "#P                E#",
+    "# P              E #",
     "# ### ### ###### ###",
     "# # C           #   #",
     "# # ### ##  #####   #",
@@ -33,7 +33,7 @@ maze = [
     "# ### ### ###### ###",
     "# #           #    #",
     "# # ### ######   ####",
-    "#     #           D  #",
+    "#     #             D#",
     "####################",
 ]
 ROWS = len(maze)
@@ -43,9 +43,9 @@ player_pos = None
 enemy_pos = None
 walls = []
 collectibles = []
-door_pos = None  # Position of the door
+door_pos = None  # Door position
 
-# Initialize positions, walls, collectibles, and the door
+# Initialize everything
 for row_idx, row in enumerate(maze):
     for col_idx, cell in enumerate(row):
         x, y = col_idx * CELL_SIZE, row_idx * CELL_SIZE
@@ -60,10 +60,10 @@ for row_idx, row in enumerate(maze):
         elif cell == "D":
             door_pos = [x, y]  # Door position
 
-# Load images
+# Load pics
 player_image = pygame.image.load('assets/player.png')
 player_image = pygame.transform.scale(player_image, (CELL_SIZE, CELL_SIZE))
-eye_image = pygame.image.load('assets/eye.png')  # Enemy sprite
+eye_image = pygame.image.load('assets/eye.png')  
 eye_image = pygame.transform.scale(eye_image, (CELL_SIZE, CELL_SIZE))
 background_image = pygame.image.load('assets/background.png')
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
@@ -74,16 +74,16 @@ open_door_image = pygame.transform.scale(open_door_image, (CELL_SIZE, CELL_SIZE)
 chest_image = pygame.image.load('assets/chest1.png')
 chest_image = pygame.transform.scale(chest_image, (WIDTH, HEIGHT))
 
-# Load sound effects
-pygame.mixer.music.load('assets/background_music.mp3')  # Background music
+# Load sfx
+pygame.mixer.music.load('assets/background_music.mp3')  
 pygame.mixer.music.play(-1, 0.0)  # Loop the background music
-bling_sound = pygame.mixer.Sound('assets/bling_sound.wav')  # Bling sound
-win_sound = pygame.mixer.Sound('assets/win.mp3')  # Win sound
+bling_sound = pygame.mixer.Sound('assets/bling_sound.wav')  
+win_sound = pygame.mixer.Sound('assets/win.mp3')  
 
-# Font for displaying text
+# Text Font
 font = pygame.font.SysFont("Arial", 40)
 
-# Helper functions
+# Helper stuff
 def draw_maze():
     for wall in walls:
         pygame.draw.rect(screen, MAZE_COLOR, wall)
@@ -107,19 +107,18 @@ def display_text(text):
     text_rect = render_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
     screen.blit(render_text, text_rect)
 
-# Main game loop
-running = True
-clock = pygame.time.Clock()
+# MAIN LEVEL RUNNING
+def run_level():
+    door_open = False
+    score = 0
+    running = True
+    clock = pygame.time.Clock()
+    
+    player_pos = [80, 100]
+    enemy_pos = [300, 100]
 
-# Movement directions
-player_speed = 10
-enemy_speed = 2
-score = 0
-door_open = False
-
-try:
     while running:
-        screen.fill(BLACK)  # Clear the screen
+        screen.fill(BLACK)  # Clear screen
         screen.blit(background_image, (0, 0))  # Draw background
 
         # Event Handling
@@ -127,17 +126,17 @@ try:
             if event.type == pygame.QUIT:
                 running = False
 
-        # Player Movement
+        # Movement
         keys = pygame.key.get_pressed()
         move = [0, 0]
         if keys[pygame.K_UP]:
-            move[1] -= player_speed
+            move[1] -= 10
         if keys[pygame.K_DOWN]:
-            move[1] += player_speed
+            move[1] += 10
         if keys[pygame.K_LEFT]:
-            move[0] -= player_speed
+            move[0] -= 10
         if keys[pygame.K_RIGHT]:
-            move[0] += player_speed
+            move[0] += 10
 
         new_player_pos = [player_pos[0] + move[0], player_pos[1] + move[1]]
         player_rect = pygame.Rect(*new_player_pos, CELL_SIZE, CELL_SIZE)
@@ -171,13 +170,13 @@ try:
         # Enemy movement logic (follows player)
         move_enemy = [0, 0]
         if enemy_pos[0] < player_pos[0]:
-            move_enemy[0] = enemy_speed
+            move_enemy[0] = 2
         elif enemy_pos[0] > player_pos[0]:
-            move_enemy[0] = -enemy_speed
+            move_enemy[0] = -2
         if enemy_pos[1] < player_pos[1]:
-            move_enemy[1] = enemy_speed
+            move_enemy[1] = 2
         elif enemy_pos[1] > player_pos[1]:
-            move_enemy[1] = -enemy_speed
+            move_enemy[1] = -2
 
         enemy_rect = pygame.Rect(enemy_pos[0] + move_enemy[0], enemy_pos[1], CELL_SIZE, CELL_SIZE)
         if not any(enemy_rect.colliderect(wall) for wall in walls):
@@ -197,9 +196,5 @@ try:
         pygame.display.flip()
         clock.tick(FPS)
 
-except Exception as e:
-    print(f"Error occurred: {e}")
     pygame.quit()
-    quit()
-
-pygame.quit()
+    sys.exit()

@@ -15,7 +15,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 HOVER_COLOR = (100, 100, 100)
 
-# Load assets
+# Assests
 menu_background = pygame.image.load("assets/title.png")
 menu_background = pygame.transform.scale(menu_background, (WIDTH, HEIGHT))
 play_button = pygame.image.load("assets/playbutton.png")
@@ -29,19 +29,19 @@ quit_button_rect = quit_button.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 150))
 # Draw menu
 def draw_menu(selected_button=None):
     screen.blit(menu_background, (0, 0))
-    # Draw play button with hover effect
+    # play button + hover
     if selected_button == "play":
         pygame.draw.rect(screen, HOVER_COLOR, play_button_rect)
     screen.blit(play_button, play_button_rect)
     
-    # Draw quit button with hover effect
+    # quit button + hover
     if selected_button == "quit":
         pygame.draw.rect(screen, HOVER_COLOR, quit_button_rect)
     screen.blit(quit_button, quit_button_rect)
     
     pygame.display.flip()
 
-# Handle button click
+# if button clicking
 def handle_button_click(button_rect):
     if button_rect.collidepoint(pygame.mouse.get_pos()):
         return True
@@ -58,7 +58,7 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEMOTION:
-                # Change button color when hovering
+                # Button color changes when mouse on it
                 if play_button_rect.collidepoint(event.pos):
                     selected_button = "play"
                 elif quit_button_rect.collidepoint(event.pos):
@@ -75,21 +75,22 @@ def main_menu():
         
         clock.tick(60)
 
-# Dynamic game run
+# DYNAMICALLY RUNNING THE GAME
 def start_game(level_name):
     try:
-        level_module = importlib.import_module(f"level{level_name}")
+        level_module = importlib.import_module(f"levels.level{level_name}")
         completed = level_module.run_level()  # ADD `run_level()` FUNCTION TO EACH LEVEL
         if completed:
-            print(f"Level {level_name} completed.")
+            print(f"Level {level_name} Done.")
     except ModuleNotFoundError:
-        print(f"Error: Level {level_name} not found!")
+        print(f"Error: Level {level_name} cant be found")
 
-# Level Select 
+# Level Selecting
 def level_selector():
     selected_level = None
+    level1_rect, level2_rect, level3_rect, level4_rect, level5_rect = draw_level_selection_menu()
+    
     while selected_level is None:
-        draw_level_selection_menu()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -124,7 +125,7 @@ def draw_level_selection_menu():
     level3_rect = screen.blit(level3_text, (WIDTH // 2 - level3_text.get_width() // 2, HEIGHT // 2))
     level4_rect = screen.blit(level4_text, (WIDTH // 2 - level4_text.get_width() // 2, HEIGHT // 2 + 50))
     level5_rect = screen.blit(level5_text, (WIDTH // 2 - level5_text.get_width() // 2, HEIGHT // 2 + 100))
-
+    
     return level1_rect, level2_rect, level3_rect, level4_rect, level5_rect
 
 # Start the game

@@ -33,7 +33,7 @@ maze = [
     "# ### ### ###### ###",
     "# #           #    #",
     "# # ### ######   ####",
-    "#     #             D#",
+    "#    #          D  #",
     "####################",
 ]
 ROWS = len(maze)
@@ -43,22 +43,6 @@ player_pos = None
 enemy_pos = None
 walls = []
 collectibles = []
-door_pos = None  # Door position
-
-# Initialize everything
-for row_idx, row in enumerate(maze):
-    for col_idx, cell in enumerate(row):
-        x, y = col_idx * CELL_SIZE, row_idx * CELL_SIZE
-        if cell == "#":
-            walls.append(pygame.Rect(x, y, CELL_SIZE, CELL_SIZE))
-        elif cell == "P":
-            player_pos = [x, y]  # Player position
-        elif cell == "E":
-            enemy_pos = [x, y]  # Enemy position
-        elif cell == "C":
-            collectibles.append(pygame.Rect(x, y, 10, 10))  # Collectibles
-        elif cell == "D":
-            door_pos = [x, y]  # Door position
 
 # Load pics
 player_image = pygame.image.load('assets/player.png')
@@ -88,18 +72,44 @@ def draw_maze():
     for wall in walls:
         pygame.draw.rect(screen, MAZE_COLOR, wall)
 
+def get_initial_positions(maze):
+    global walls
+    global door_pos
+    walls.clear
+
+    player_start = None
+    enemy_start = None
+    door_pos = None
+    for row_idx, row in enumerate(maze):
+        for col_idx, cell in enumerate(row):
+            x, y = col_idx * CELL_SIZE, row_idx * CELL_SIZE
+            if cell == "P":
+                player_start = [x, y]
+            elif cell == "E":
+                enemy_start = [x, y]
+            elif cell == "C":
+                collectibles.append(pygame.Rect(x, y, 10, 10))  
+            elif cell == "D":
+                door_pos = [x, y] 
+            elif cell == "#":
+                walls.append(pygame.Rect(x, y, CELL_SIZE, CELL_SIZE))
+    return player_start, enemy_start, collectibles, door_pos, walls
+
 def draw_player(pos):
     screen.blit(player_image, pos)
 
 def draw_enemy(pos):
-    screen.blit(eye_image, pos)  # Draw the enemy sprite
+    screen.blit(eye_image, pos)  
 
 def draw_collectibles():
     for collectible in collectibles:
         pygame.draw.rect(screen, COLLECTIBLE_COLOR, collectible)
 
-def draw_door(is_open):
-    image = open_door_image if is_open else door_image
+def draw_door(door_open):
+    if door_open == True:
+        image = open_door_image
+    else:
+        image = door_image
     screen.blit(image, (door_pos[0], door_pos[1]))
 
 def display_text(text):
@@ -114,8 +124,7 @@ def run_level():
     running = True
     clock = pygame.time.Clock()
     
-    player_pos = [80, 100]
-    enemy_pos = [300, 100]
+    player_pos, enemy_pos, collectibles, door_pos, walls = get_initial_positions(maze)
 
     while running:
         screen.fill(BLACK)  # Clear screen

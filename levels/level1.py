@@ -117,6 +117,23 @@ def display_text(text):
     text_rect = render_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
     screen.blit(render_text, text_rect)
 
+def show_lost_screen():
+    fade_surface = pygame.Surface((WIDTH, HEIGHT))  
+    fade_surface.fill(BLACK)  
+    for i in range(0, 256, 5): 
+        fade_surface.set_alpha(i) 
+        screen.blit(fade_surface, (0, 0))  
+        pygame.display.flip() 
+        pygame.time.delay(50) 
+    message = "YOU ARE TO BLAME. TRY AGAIN"
+    text_surface = font.render(message, True, WHITE)
+    text_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    screen.blit(text_surface, text_rect)
+    pygame.display.flip()
+    pygame.time.delay(5000)
+    pygame.quit()
+    sys.exit()  
+
 # MAIN LEVEL RUNNING
 def run_level():
     door_open = False
@@ -175,6 +192,7 @@ def run_level():
             pygame.display.flip()
             pygame.time.delay(3000)
             running = False
+            return "completed"
 
         # Enemy movement logic (follows player)
         move_enemy = [0, 0]
@@ -186,6 +204,11 @@ def run_level():
             move_enemy[1] = 2
         elif enemy_pos[1] > player_pos[1]:
             move_enemy[1] = -2
+
+        #Lose scenario
+        enemy_rect = pygame.Rect(enemy_pos[0], enemy_pos[1], CELL_SIZE, CELL_SIZE)
+        if player_rect.colliderect(enemy_rect):
+            show_lost_screen()
 
         enemy_rect = pygame.Rect(enemy_pos[0] + move_enemy[0], enemy_pos[1], CELL_SIZE, CELL_SIZE)
         if not any(enemy_rect.colliderect(wall) for wall in walls):
@@ -204,6 +227,3 @@ def run_level():
 
         pygame.display.flip()
         clock.tick(FPS)
-
-    pygame.quit()
-    sys.exit()

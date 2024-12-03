@@ -22,13 +22,28 @@ font = pygame.font.SysFont("Arial", 40)
 # Assests
 menu_background = pygame.image.load("assets/title.png")
 menu_background = pygame.transform.scale(menu_background, (WIDTH, HEIGHT))
-play_button = pygame.image.load("assets/playbutton.png")
-play_button = pygame.transform.scale(play_button, (200, 80))
-play_button_rect = play_button.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
 
+# Load play button
+play_button = pygame.image.load("assets/playbutton.png")
+play_button_original_width = play_button.get_width()
+play_button_original_height = play_button.get_height()
+
+# Scaling
+play_button_width = 200
+play_button_height = int(play_button_original_height * (play_button_width / play_button_original_width))
+play_button = pygame.transform.scale(play_button, (play_button_width, play_button_height))
+play_button_rect = play_button.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 180))  
+
+# Load quit button
 quit_button = pygame.image.load("assets/quitbutton.png")
-quit_button = pygame.transform.scale(quit_button, (200, 80))
-quit_button_rect = quit_button.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 150))
+quit_button_original_width = quit_button.get_width()
+quit_button_original_height = quit_button.get_height()
+
+# Scaling
+quit_button_width = 200
+quit_button_height = int(quit_button_original_height * (quit_button_width / quit_button_original_width))
+quit_button = pygame.transform.scale(quit_button, (quit_button_width, quit_button_height))
+quit_button_rect = quit_button.get_rect(center=(WIDTH // 2 - 250, HEIGHT // 2 + 180))  
 
 # Draw menu
 def draw_menu(selected_button=None):

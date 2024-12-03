@@ -86,32 +86,48 @@ def show_lost_screen():
 
 # Run level function
 def run_level():
-    # Create groups for all sprites and falling objects
+    
     all_sprites = pygame.sprite.Group()
     falling_objects = pygame.sprite.Group()
 
-    # Create player object
     player = Player()
     all_sprites.add(player)
 
-    # Create random falling objects (blue)
+    # random falling objects
     for _ in range(5):
         obj = FallingObject()
         falling_objects.add(obj)
         all_sprites.add(obj)
 
-    # Game variables
     clock = pygame.time.Clock()
     key_secured = False
     target_object = None
 
+    initial_display_time = 5000 
+    start_time = pygame.time.get_ticks()
+
     while True:
-        # Handle events
+        current_time = pygame.time.get_ticks()
+
+        if current_time - start_time < initial_display_time:
+            screen.fill(BLACK)
+            run_text = font.render("Bargain with the truth", True, WHITE)
+            run_text_rect = run_text.get_rect(center=(screen_width // 2, screen_height // 2 - 20))
+            screen.blit(run_text, run_text_rect)
+
+            collect_text = font.render("Find the key and continue", True, WHITE)
+            collect_text_rect = collect_text.get_rect(center=(screen_width // 2, screen_height // 2 + 20))
+            screen.blit(collect_text, collect_text_rect)
+
+            pygame.display.flip()
+            continue
+
+        # Handling events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "quit"
 
-        # Update sprite positions
+        # Sprite update
         all_sprites.update()
 
         # Create the target object (key) if it doesn't already exist

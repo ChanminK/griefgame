@@ -1,6 +1,7 @@
 import pygame
 import sys
 
+#setup
 WIDTH, HEIGHT = 800, 600
 CELL_SIZE = 40
 FPS = 60
@@ -8,9 +9,10 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 MAZE_COLOR = (41, 0, 162)
 COLLECTIBLE_COLOR = (224, 255, 0)
+font = pygame.font.SysFont("Arial", 40)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Escape Truth")
+pygame.display.set_caption("Truth: Escape")
 
 #Maze Layout
 # EVENTUALLY MAKE IT GENERATE ITS OWN
@@ -60,12 +62,12 @@ chest_image = pygame.transform.scale(chest_image, (WIDTH, HEIGHT))
 
 # Load sfx
 pygame.mixer.music.load('assets/background_music.mp3')  
-pygame.mixer.music.play(-1, 0.0)  # Loop the background music
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1, 0.0)  
 bling_sound = pygame.mixer.Sound('assets/bling_sound.wav')  
+bling_sound.set_volume(0.3)
 win_sound = pygame.mixer.Sound('assets/win.mp3')  
-
-# Text Font
-font = pygame.font.SysFont("Arial", 40)
+win_sound.set_volume(0.4)
 
 # Helper stuff
 def draw_maze():
@@ -143,16 +145,33 @@ def run_level():
     
     player_pos, enemy_pos, collectibles, door_pos, walls = get_initial_positions(maze)
 
+    initial_display_time = 5000 
+    start_time = pygame.time.get_ticks()
+
     while running:
-        screen.fill(BLACK)  # Clear screen
-        screen.blit(background_image, (0, 0))  # Draw background
+        current_time = pygame.time.get_ticks()
+
+        if current_time - start_time < initial_display_time:
+            screen.fill(BLACK)
+            run_text = font.render("Run and deny the truth", True, WHITE)
+            run_text_rect = run_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20))
+            screen.blit(run_text, run_text_rect)
+
+            collect_text = font.render("Collect your secrets and escape", True, WHITE)
+            collect_text_rect = collect_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20))
+            screen.blit(collect_text, collect_text_rect)
+
+            pygame.display.flip()
+            continue
+
+        screen.blit(background_image, (0, 0))
 
         # Event Handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        # Movement
+        # Movin'
         keys = pygame.key.get_pressed()
         move = [0, 0]
         if keys[pygame.K_UP]:
@@ -167,7 +186,7 @@ def run_level():
         new_player_pos = [player_pos[0] + move[0], player_pos[1] + move[1]]
         player_rect = pygame.Rect(*new_player_pos, CELL_SIZE, CELL_SIZE)
 
-        # Prevent player from walking through walls
+        # NO WALL GHOSTING
         if not any(player_rect.colliderect(wall) for wall in walls):
             player_pos = new_player_pos
 
@@ -178,12 +197,12 @@ def run_level():
                 score += 1
                 bling_sound.play()
 
-        # Check if all collectibles are collected
+        # Check collectible collection
         if len(collectibles) == 0 and not door_open:
             door_open = True
             win_sound.play()
 
-        # Player reaching the door
+        # PLayer at door
         door_rect = pygame.Rect(door_pos[0], door_pos[1], CELL_SIZE, CELL_SIZE)
         if player_rect.colliderect(door_rect) and door_open:
             screen.blit(chest_image, (0, 0))  # Show chest image

@@ -13,19 +13,19 @@ clock = pygame.time.Clock()
 FPS = 60
 font = pygame.font.SysFont("Arial", 40)
 
-# Set up the screen
+# Make Screen
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Griever v Anger")
+pygame.display.set_caption("Anger: Griever vs. Truth")
 
-# Load assets
+# Load stuff
 win_sound_path = "assets/win.mp3"
 chest_image_path = "assets/chest2.png"
 pygame.mixer.init()
 win_sound = pygame.mixer.Sound(win_sound_path)
+win_sound.set_volume(0.4)
 chest_image = pygame.image.load(chest_image_path)
 chest_image = pygame.transform.scale(chest_image, (WIDTH, HEIGHT))
 
-# Fighter class
 class Fighter:
     def __init__(self, x, y, image_path, speed, damage):
         self.x = x
@@ -106,7 +106,25 @@ def run_level():
     delay_counter = 5
     running = True
 
+    initial_display_time = 5000 
+    start_time = pygame.time.get_ticks()
+
     while running:
+        current_time = pygame.time.get_ticks()
+
+        if current_time - start_time < initial_display_time:
+            screen.fill(BLACK)
+            run_text = font.render("Use your anger", True, WHITE)
+            run_text_rect = run_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20))
+            screen.blit(run_text, run_text_rect)
+
+            collect_text = font.render("Fight your truth and win", True, WHITE)
+            collect_text_rect = collect_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20))
+            screen.blit(collect_text, collect_text_rect)
+
+            pygame.display.flip()
+            continue
+
         screen.fill(BLACK)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

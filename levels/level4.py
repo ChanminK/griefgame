@@ -1,22 +1,16 @@
 import pygame
 import random
 
-# Initialize Pygame
+# Initialize stuff
 pygame.init()
 
-# Screen dimensions and settings
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 FPS = 60
-
-# Colors
 BLUE = (135, 206, 250)
 GREEN = (34, 139, 34)
 BLACK = (0, 0, 0)
-
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-# Fonts
 font = pygame.font.Font(None, 36)
 
 # Load assets
@@ -28,6 +22,7 @@ win_image = pygame.transform.scale(win_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 pygame.mixer.init()
 win_sound = pygame.mixer.Sound("assets/win.mp3")
+win_sound.set_volume(0.4)
 
 # Functions
 def draw_text(text, x, y, color=BLACK):
@@ -35,7 +30,6 @@ def draw_text(text, x, y, color=BLACK):
     screen.blit(surface, (x, y))
 
 def spawn_platform(platforms, platform_width, platform_height):
-    """Spawns a new platform at a random height."""
     y = random.randint(SCREEN_HEIGHT // 2, SCREEN_HEIGHT - 50)
     platform = pygame.Rect(SCREEN_WIDTH, y, platform_width, platform_height)
     platforms.append(platform)
@@ -43,7 +37,7 @@ def spawn_platform(platforms, platform_width, platform_height):
 def run_level():
     # Initialize screen and clock
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Platform Jumper")
+    pygame.display.set_caption("Depression: Jump")
     clock = pygame.time.Clock()
 
     # Player settings

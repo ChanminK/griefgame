@@ -16,7 +16,7 @@ def run_level():
     pygame.display.set_caption("Level 5 - Image Sequence")
     clock = pygame.time.Clock()
 
-    # Load images (ensure you have these images in your project folder)
+    # Load assets
     image_paths = [
         "assets/image1.png",
         "assets/image2.png",
@@ -29,7 +29,7 @@ def run_level():
     images = [pygame.image.load(path) for path in image_paths]
     images = [pygame.transform.scale(img, (SCREEN_WIDTH, SCREEN_HEIGHT)) for img in images]  # Scale to fit screen
 
-    # Main game loop variables
+    # Loopin
     current_image_index = 0
     image_display_time = 5000 
     last_switch_time = pygame.time.get_ticks()  
@@ -47,17 +47,22 @@ def run_level():
 
         # Current image
         if current_image_index < len(images):
-            screen.fill((0, 0, 0))  # Fill screen with black (optional)
-            screen.blit(images[current_image_index], (0, 0))  # Draw the current image
+            screen.fill((0, 0, 0))  #
+            screen.blit(images[current_image_index], (0, 0))  
             pygame.display.flip()
 
         clock.tick(FPS)
     
     # ENDING
-    screen.fill((0, 0, 0))  # BLACK SCREEN
+    screen.fill((0, 0, 0))  
     font = pygame.font.Font(None, 74)
-    thank_you_text = font.render("Grief is difficult. Thank you for playing", True, (255, 255, 255))
-    text_rect = thank_you_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    
+    grief_text = font.render("Grief is difficult.", True, (255, 255, 255))
+    grief_rect = grief_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 40))
+    screen.blit(grief_text, grief_rect)
+
+    thank_you_text = font.render("Thank you for playing", True, (255, 255, 255))
+    text_rect = thank_you_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 40))
     screen.blit(thank_you_text, text_rect)
     pygame.display.flip()
 
